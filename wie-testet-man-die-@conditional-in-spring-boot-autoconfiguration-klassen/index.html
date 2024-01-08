@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+  <meta http-equiv="X-Clacks-Overhead" content="GNU Terry Pratchett" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="shortcut icon" href="https://ksewen.github.io/images/favicon.png" />
+<title>Wie testet man die @Conditional in Spring Boot AutoConfiguration-Klassen? | Hugo ʕ•ᴥ•ʔ Bear Blog</title>
+<meta name="title" content="Wie testet man die @Conditional in Spring Boot AutoConfiguration-Klassen?" />
+<meta name="description" content="Um die Arbeit mit Spring Boot zu vereinfachen, wird Spring-Boot-Starter verwendet. Durch die Definition der AutoConfiguration-Klassen kann man eigene Starters erstellen. In diesem Tutorial kann man erfahren, wie man Unit-Tests für diese Klassen erstellt." />
+<meta name="keywords" content="Spring Boot,Unit-Testing,Junit5,Mockito," />
+
+
+<meta property="og:title" content="Wie testet man die @Conditional in Spring Boot AutoConfiguration-Klassen?" />
+<meta property="og:description" content="Um die Arbeit mit Spring Boot zu vereinfachen, wird Spring-Boot-Starter verwendet. Durch die Definition der AutoConfiguration-Klassen kann man eigene Starters erstellen. In diesem Tutorial kann man erfahren, wie man Unit-Tests für diese Klassen erstellt." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://ksewen.github.io/wie-testet-man-die-@conditional-in-spring-boot-autoconfiguration-klassen/" /><meta property="og:image" content="https://ksewen.github.io/images/share.png"/><meta property="article:section" content="blog" />
+<meta property="article:published_time" content="2024-01-07T16:27:33+03:00" />
+<meta property="article:modified_time" content="2024-01-07T16:27:33+03:00" /><meta property="og:site_name" content="Hugo ʕ•ᴥ•ʔ Bear" />
+
+
+
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://ksewen.github.io/images/share.png"/>
+
+<meta name="twitter:title" content="Wie testet man die @Conditional in Spring Boot AutoConfiguration-Klassen?"/>
+<meta name="twitter:description" content="Um die Arbeit mit Spring Boot zu vereinfachen, wird Spring-Boot-Starter verwendet. Durch die Definition der AutoConfiguration-Klassen kann man eigene Starters erstellen. In diesem Tutorial kann man erfahren, wie man Unit-Tests für diese Klassen erstellt."/>
+
+
+
+<meta itemprop="name" content="Wie testet man die @Conditional in Spring Boot AutoConfiguration-Klassen?">
+<meta itemprop="description" content="Um die Arbeit mit Spring Boot zu vereinfachen, wird Spring-Boot-Starter verwendet. Durch die Definition der AutoConfiguration-Klassen kann man eigene Starters erstellen. In diesem Tutorial kann man erfahren, wie man Unit-Tests für diese Klassen erstellt."><meta itemprop="datePublished" content="2024-01-07T16:27:33+03:00" />
+<meta itemprop="dateModified" content="2024-01-07T16:27:33+03:00" />
+<meta itemprop="wordCount" content="559"><meta itemprop="image" content="https://ksewen.github.io/images/share.png"/>
+<meta itemprop="keywords" content="Spring Boot,Unit-Testing,Junit5,Mockito," />
+<meta name="referrer" content="no-referrer-when-downgrade" />
+
+  <style>
+  body {
+    font-family: Verdana, sans-serif;
+    margin: auto;
+    padding: 20px;
+    max-width: 720px;
+    text-align: left;
+    background-color: #fff;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.5;
+    color: #444;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  strong,
+  b {
+    color: #222;
+  }
+
+  a {
+    color: #3273dc;
+     
+  }
+
+  .title {
+    text-decoration: none;
+    border: 0;
+  }
+
+  .title span {
+    font-weight: 400;
+  }
+
+  nav a {
+    margin-right: 10px;
+  }
+
+  textarea {
+    width: 100%;
+    font-size: 16px;
+  }
+
+  input {
+    font-size: 16px;
+  }
+
+  content {
+    line-height: 1.6;
+  }
+
+  table {
+    width: 100%;
+  }
+
+  img {
+    max-width: 100%;
+  }
+
+  code {
+    padding: 2px 5px;
+    background-color: #f2f2f2;
+  }
+
+  pre code {
+    color: #222;
+    display: block;
+    padding: 20px;
+    white-space: pre-wrap;
+    font-size: 14px;
+    overflow-x: auto;
+  }
+
+  div.highlight pre {
+    background-color: initial;
+    color: initial;
+  }
+
+  div.highlight code {
+    background-color: unset;
+    color: unset;
+  }
+
+  blockquote {
+    border-left: 1px solid #999;
+    color: #222;
+    padding-left: 20px;
+    font-style: italic;
+  }
+
+  footer {
+    padding: 25px;
+    text-align: center;
+  }
+
+  .helptext {
+    color: #777;
+    font-size: small;
+  }
+
+  .errorlist {
+    color: #eba613;
+    font-size: small;
+  }
+
+   
+  ul.blog-posts {
+    list-style-type: none;
+    padding: unset;
+  }
+
+  ul.blog-posts li {
+    display: flex;
+  }
+
+  ul.blog-posts li span {
+    flex: 0 0 130px;
+  }
+
+  ul.blog-posts li a:visited {
+    color: #8b6fcb;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    body {
+      background-color: #333;
+      color: #ddd;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    strong,
+    b {
+      color: #eee;
+    }
+
+    a {
+      color: #8cc2dd;
+    }
+
+    code {
+      background-color: #777;
+    }
+
+    pre code {
+      color: #ddd;
+    }
+
+    blockquote {
+      color: #ccc;
+    }
+
+    textarea,
+    input {
+      background-color: #252525;
+      color: #ddd;
+    }
+
+    .helptext {
+      color: #aaa;
+    }
+  }
+
+</style>
+
+</head>
+
+<body>
+  <header><a href="/" class="title">
+  <h2>Hugo ʕ•ᴥ•ʔ Bear Blog</h2>
+</a>
+<nav><a href="/">Home</a>
+
+
+<a href="/blog">Blog</a>
+
+</nav>
+</header>
+  <main>
+
+<h1>Wie testet man die @Conditional in Spring Boot AutoConfiguration-Klassen?</h1>
+<p>
+  <i>
+    <time datetime='2024-01-07' pubdate>
+      07 Jan, 2024
+    </time>
+  </i>
+</p>
+
+<content>
+  <h1 id="umgebung">Umgebung</h1>
+<ul>
+<li>Java 21</li>
+<li>Spring Boot 3.2.1</li>
+<li>Junit 5.10.1</li>
+<li>Mockito 5.7.0</li>
+<li>AssertJ 3.24.0</li>
+</ul>
+<h1 id="einführung">Einführung</h1>
+<p>„AutoConfiguration“ in Spring Boot ist ein Feature, das auf bedingter Konfiguration basiert, um verschiedene Komponenten und Funktionen einer Spring-Application automatisch zu konfigurieren. Dies wird durch die bedingte Annotation „@Conditional“ ermöglicht. Mithilfe diesen Bedingten können Konfigurationen auf bestimmten Bedingungen aktiviert oder deaktiviert werden. Eine Frage, wie stellt man sicher, dass die definierten Bedingungen korrekt sind, wenn man ein eigenen Spring-Boot-Starter erstellen möchte? Auf dem Instinkt kann man direkt die Application starten und debuggen. Mit diesem Verhalten kann man natürlich diese Aufgabe erledigen, jedoch hilft es keineswegs bei der Automatisierung. Eine bessere Alternativ dazu kann man Unit-Testing mit Junit und Mockito für AutoConfiguration-Klasse erstellen, in diesem Tutorial kannst du ein paar Beispiele erfahren.</p>
+<h1 id="grundwissen">Grundwissen</h1>
+<h2 id="applicationcontextrunner">ApplicationContextRunner</h2>
+<p>ApplicationContextRunner ist ein praktisches Werkzeug beim Testen des Spring-Anwendungskontexts. Es ermöglicht die Erstellung eines minimalen Spring-Kontexts während des Tests, der nur die erforderlichen Beans enthält.</p>
+<h1 id="annotationen-und-tests">Annotationen und Tests</h1>
+<h2 id="conditionalonclass">@ConditionalOnClass</h2>
+<h3 id="configuration">Configuration</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Bean</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@ConditionalOnClass</span>(Logger.<span style="color:#a6e22e">class</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> Marker <span style="color:#a6e22e">conditionalOnClassMarker</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> Marker();
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="test">Test</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Test</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">conditionalOnClassMarker</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">new</span> ApplicationContextRunner()
+</span></span><span style="display:flex;"><span>        .<span style="color:#a6e22e">withConfiguration</span>(AutoConfigurations.<span style="color:#a6e22e">of</span>(ClassConditional.<span style="color:#a6e22e">class</span>))
+</span></span><span style="display:flex;"><span>        .<span style="color:#a6e22e">run</span>(
+</span></span><span style="display:flex;"><span>            (context) <span style="color:#f92672">-&gt;</span> {
+</span></span><span style="display:flex;"><span>                assertThat(context).<span style="color:#a6e22e">hasSingleBean</span>(ClassConditional.<span style="color:#a6e22e">Marker</span>.<span style="color:#a6e22e">class</span>);
+</span></span><span style="display:flex;"><span>                assertThat(context)
+</span></span><span style="display:flex;"><span>                    .<span style="color:#a6e22e">getBean</span>(<span style="color:#e6db74">&#34;conditionalOnClassMarker&#34;</span>)
+</span></span><span style="display:flex;"><span>                    .<span style="color:#a6e22e">isSameAs</span>(context.<span style="color:#a6e22e">getBean</span>(ClassConditional.<span style="color:#a6e22e">Marker</span>.<span style="color:#a6e22e">class</span>));
+</span></span><span style="display:flex;"><span>            });
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="conditionalonmissingclass">@ConditionalOnMissingClass</h2>
+<h3 id="configuration-1">Configuration</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Bean</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@ConditionalOnMissingClass</span>(<span style="color:#e6db74">&#34;org.apache.logging.log4j.Logger&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> Marker <span style="color:#a6e22e">conditionalOnMissingClassMarker</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> Marker();
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="test-1">Test</h3>
+<p>Mit <strong>FilteredClassLoader</strong> kann eine Umgebung ohne die bestimmten Klassen simuliert werden.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Test</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">conditionalOnMissingClassMarker</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">new</span> ApplicationContextRunner()
+</span></span><span style="display:flex;"><span>        .<span style="color:#a6e22e">withConfiguration</span>(AutoConfigurations.<span style="color:#a6e22e">of</span>(ClassConditional.<span style="color:#a6e22e">class</span>))
+</span></span><span style="display:flex;"><span>        .<span style="color:#a6e22e">withClassLoader</span>(<span style="color:#66d9ef">new</span> FilteredClassLoader(Logger.<span style="color:#a6e22e">class</span>))
+</span></span><span style="display:flex;"><span>        .<span style="color:#a6e22e">run</span>(
+</span></span><span style="display:flex;"><span>            (context) <span style="color:#f92672">-&gt;</span> {
+</span></span><span style="display:flex;"><span>                assertThat(context).<span style="color:#a6e22e">hasSingleBean</span>(ClassConditional.<span style="color:#a6e22e">Marker</span>.<span style="color:#a6e22e">class</span>);
+</span></span><span style="display:flex;"><span>                assertThat(context)
+</span></span><span style="display:flex;"><span>                    .<span style="color:#a6e22e">getBean</span>(<span style="color:#e6db74">&#34;conditionalOnMissingClassMarker&#34;</span>)
+</span></span><span style="display:flex;"><span>                    .<span style="color:#a6e22e">isSameAs</span>(context.<span style="color:#a6e22e">getBean</span>(ClassConditional.<span style="color:#a6e22e">Marker</span>.<span style="color:#a6e22e">class</span>));
+</span></span><span style="display:flex;"><span>            });
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="conditionalonbean">@ConditionalOnBean</h2>
+<h3 id="configuration-2">Configuration</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Bean</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@ConditionalOnBean</span>(Logger.<span style="color:#a6e22e">class</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> Marker <span style="color:#a6e22e">conditionalOnBeanMarker</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> Marker();
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="test-2">Test</h3>
+<p>Für diesen Fall wird eine registrierte Bean im Kontext benötigt, deren Typ „Logger“ ist. Aber es gibt keine. Um diese Situation zu simulieren, füge einfach in der Testklasse mithilfe einer Konfigurationsklasse eine Instanz ein, die durch <strong>Mockito</strong> erstellt wird.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Test</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">conditionalOnBeanMarker</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">new</span> ApplicationContextRunner()
+</span></span><span style="display:flex;"><span>        .<span style="color:#a6e22e">withConfiguration</span>(
+</span></span><span style="display:flex;"><span>            AutoConfigurations.<span style="color:#a6e22e">of</span>(BeanConditional.<span style="color:#a6e22e">class</span>, MockLoggerAutoConfiguration.<span style="color:#a6e22e">class</span>))
+</span></span><span style="display:flex;"><span>        .<span style="color:#a6e22e">run</span>(
+</span></span><span style="display:flex;"><span>            (context) <span style="color:#f92672">-&gt;</span> {
+</span></span><span style="display:flex;"><span>                assertThat(context).<span style="color:#a6e22e">hasSingleBean</span>(BeanConditional.<span style="color:#a6e22e">Marker</span>.<span style="color:#a6e22e">class</span>);
+</span></span><span style="display:flex;"><span>                assertThat(context)
+</span></span><span style="display:flex;"><span>                    .<span style="color:#a6e22e">getBean</span>(<span style="color:#e6db74">&#34;conditionalOnBeanMarker&#34;</span>)
+</span></span><span style="display:flex;"><span>                    .<span style="color:#a6e22e">isSameAs</span>(context.<span style="color:#a6e22e">getBean</span>(BeanConditional.<span style="color:#a6e22e">Marker</span>.<span style="color:#a6e22e">class</span>));
+</span></span><span style="display:flex;"><span>            });
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Configuration</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@AutoConfigureBefore</span>(BeanConditional.<span style="color:#a6e22e">class</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MockLoggerAutoConfiguration</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@Bean</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> Logger <span style="color:#a6e22e">logger</span>() {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> mock(Logger.<span style="color:#a6e22e">class</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="conditionalonmissingbean">@ConditionalOnMissingBean</h2>
+<h3 id="configuration-3">Configuration</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Bean</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@ConditionalOnMissingBean</span>(Marker.<span style="color:#a6e22e">class</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> Marker <span style="color:#a6e22e">conditionalOnMissingBeanMarker</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> Marker();
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="test-3">Test</h3>
+<p>Eine Mock-Bean ist auch hilfreich, wenn man in der Konfiguration-Klasse <strong>@ConditionalOnMissingBean</strong> verwendet hat. Wir können auch in der Testklasse mithilfe einer Konfigurationklasse eine fiktive Bean einfügen. In diesem Fall ist es nicht zwingend erforderlich, die Wahrheit der Behauptung zu überprüfen, ob die Bean im Kontext eine Mockbean ist, weil die beiden Beans unterschiedliche Namen haben. Aber die Beans werden denselben Namen haben, wenn man mit <strong>BeanName</strong> diese Annotation verwendet. Hierbei wird die statische Methode <strong>isMock()</strong> eine bedeutende Rolle spielen.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Test</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">conditionalOnMissingBeanMarker</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">new</span> ApplicationContextRunner()
+</span></span><span style="display:flex;"><span>        .<span style="color:#a6e22e">withConfiguration</span>(AutoConfigurations.<span style="color:#a6e22e">of</span>(BeanConditional.<span style="color:#a6e22e">class</span>))
+</span></span><span style="display:flex;"><span>        .<span style="color:#a6e22e">run</span>(
+</span></span><span style="display:flex;"><span>            (context) <span style="color:#f92672">-&gt;</span> {
+</span></span><span style="display:flex;"><span>            assertThat(context).<span style="color:#a6e22e">hasSingleBean</span>(BeanConditional.<span style="color:#a6e22e">Marker</span>.<span style="color:#a6e22e">class</span>);
+</span></span><span style="display:flex;"><span>            assertThat(context)
+</span></span><span style="display:flex;"><span>                .<span style="color:#a6e22e">getBean</span>(<span style="color:#e6db74">&#34;conditionalOnMissingBeanMarker&#34;</span>)
+</span></span><span style="display:flex;"><span>                .<span style="color:#a6e22e">isSameAs</span>(context.<span style="color:#a6e22e">getBean</span>(BeanConditional.<span style="color:#a6e22e">Marker</span>.<span style="color:#a6e22e">class</span>));
+</span></span><span style="display:flex;"><span>            assertThat(isMock(context.<span style="color:#a6e22e">getBean</span>(BeanConditional.<span style="color:#a6e22e">Marker</span>.<span style="color:#a6e22e">class</span>))).<span style="color:#a6e22e">isFalse</span>();
+</span></span><span style="display:flex;"><span>            });
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Test</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">conditionalOnMissingBeanWithMockMarker</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">new</span> ApplicationContextRunner()
+</span></span><span style="display:flex;"><span>        .<span style="color:#a6e22e">withConfiguration</span>(
+</span></span><span style="display:flex;"><span>            AutoConfigurations.<span style="color:#a6e22e">of</span>(BeanConditional.<span style="color:#a6e22e">class</span>, MockMarkerAutoConfiguration.<span style="color:#a6e22e">class</span>))
+</span></span><span style="display:flex;"><span>        .<span style="color:#a6e22e">run</span>(
+</span></span><span style="display:flex;"><span>            (context) <span style="color:#f92672">-&gt;</span> {
+</span></span><span style="display:flex;"><span>            assertThat(context).<span style="color:#a6e22e">hasSingleBean</span>(BeanConditional.<span style="color:#a6e22e">Marker</span>.<span style="color:#a6e22e">class</span>);
+</span></span><span style="display:flex;"><span>            assertThat(context)
+</span></span><span style="display:flex;"><span>                .<span style="color:#a6e22e">getBean</span>(<span style="color:#e6db74">&#34;mockMarker&#34;</span>)
+</span></span><span style="display:flex;"><span>                .<span style="color:#a6e22e">isSameAs</span>(context.<span style="color:#a6e22e">getBean</span>(BeanConditional.<span style="color:#a6e22e">Marker</span>.<span style="color:#a6e22e">class</span>));
+</span></span><span style="display:flex;"><span>            assertThat(isMock(context.<span style="color:#a6e22e">getBean</span>(BeanConditional.<span style="color:#a6e22e">Marker</span>.<span style="color:#a6e22e">class</span>))).<span style="color:#a6e22e">isTrue</span>();
+</span></span><span style="display:flex;"><span>            });
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Configuration</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@AutoConfigureBefore</span>(BeanConditional.<span style="color:#a6e22e">class</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MockMarkerAutoConfiguration</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">@Bean</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> BeanConditional.<span style="color:#a6e22e">Marker</span> <span style="color:#a6e22e">mockMarker</span>() {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> mock(BeanConditional.<span style="color:#a6e22e">Marker</span>.<span style="color:#a6e22e">class</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="conditionalonproperty">@ConditionalOnProperty</h2>
+<h3 id="configuration-4">Configuration</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Bean</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@ConditionalOnProperty</span>(value <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;conditional.enabled&#34;</span>, havingValue <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;true&#34;</span>, matchIfMissing <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> Marker <span style="color:#a6e22e">conditionalOnPropertyMarker</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> Marker();
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="test-4">Test</h3>
+<p>Die Methode <strong>ApplicationContextRunner.withPropertyValues(String&hellip; pairs)</strong> vereinfacht die Simulation der PropertyConditional.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#a6e22e">@Test</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">conditionalOnPropertyMarker</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">new</span> ApplicationContextRunner()
+</span></span><span style="display:flex;"><span>        .<span style="color:#a6e22e">withConfiguration</span>(AutoConfigurations.<span style="color:#a6e22e">of</span>(PropertyConditional.<span style="color:#a6e22e">class</span>))
+</span></span><span style="display:flex;"><span>        .<span style="color:#a6e22e">run</span>(
+</span></span><span style="display:flex;"><span>            (context) <span style="color:#f92672">-&gt;</span> {
+</span></span><span style="display:flex;"><span>            assertThat(context).<span style="color:#a6e22e">hasSingleBean</span>(PropertyConditional.<span style="color:#a6e22e">Marker</span>.<span style="color:#a6e22e">class</span>);
+</span></span><span style="display:flex;"><span>            assertThat(context)
+</span></span><span style="display:flex;"><span>                .<span style="color:#a6e22e">getBean</span>(<span style="color:#e6db74">&#34;conditionalOnPropertyMarker&#34;</span>)
+</span></span><span style="display:flex;"><span>                .<span style="color:#a6e22e">isSameAs</span>(context.<span style="color:#a6e22e">getBean</span>(PropertyConditional.<span style="color:#a6e22e">Marker</span>.<span style="color:#a6e22e">class</span>));
+</span></span><span style="display:flex;"><span>            });
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">@Test</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">noConditionalOnPropertyMarker</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">new</span> ApplicationContextRunner()
+</span></span><span style="display:flex;"><span>        .<span style="color:#a6e22e">withConfiguration</span>(AutoConfigurations.<span style="color:#a6e22e">of</span>(PropertyConditional.<span style="color:#a6e22e">class</span>))
+</span></span><span style="display:flex;"><span>        .<span style="color:#a6e22e">withPropertyValues</span>(<span style="color:#e6db74">&#34;conditional.enabled=false&#34;</span>)
+</span></span><span style="display:flex;"><span>        .<span style="color:#a6e22e">run</span>(
+</span></span><span style="display:flex;"><span>            (context) <span style="color:#f92672">-&gt;</span> {
+</span></span><span style="display:flex;"><span>            assertThat(context).<span style="color:#a6e22e">doesNotHaveBean</span>(PropertyConditional.<span style="color:#a6e22e">Marker</span>.<span style="color:#a6e22e">class</span>);
+</span></span><span style="display:flex;"><span>            });
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="kombination-von-conditional">Kombination von @Conditional</h2>
+<p>In Spring Boot gibt es Möglichkeiten, verschiedene Bedingungen zu kombinieren. Durch die Kombination der oben genannten Beispiele lassen sich problemlos die meisten Szenarien abdecken.</p>
+<h1 id="code-auf-github">Code auf Github</h1>
+<p><a href="https://github.com/ksewen/unit-testing-tutorial/tree/main/conditional">ksewen/unit-testing-tutorial/conditional</a></p>
+<p>Diskussionen, Fragen um Aufzeigen meiner Fehler sind willkommen.</p>
+
+</content>
+<p>
+  
+  <a href="https://ksewen.github.io/blog/spring-boot/">#Spring Boot</a>
+  
+  <a href="https://ksewen.github.io/blog/unit-testing/">#Unit-Testing</a>
+  
+  <a href="https://ksewen.github.io/blog/junit5/">#Junit5</a>
+  
+  <a href="https://ksewen.github.io/blog/mockito/">#Mockito</a>
+  
+</p>
+
+  </main>
+  <footer>Made with <a href="https://github.com/janraasch/hugo-bearblog/">Hugo ʕ•ᴥ•ʔ Bear</a>
+</footer>
+
+    
+</body>
+
+</html>

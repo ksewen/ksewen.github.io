@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Mockito on Hugo ʕ•ᴥ•ʔ Bear Blog</title>
+    <link>https://ksewen.github.io/blog/mockito/</link>
+    <description>Recent content in Mockito on Hugo ʕ•ᴥ•ʔ Bear Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language>
+    <copyright>Copyright © 2020, Jane Doe.</copyright>
+    <lastBuildDate>Sun, 07 Jan 2024 16:27:33 +0300</lastBuildDate>
+    <atom:link href="https://ksewen.github.io/blog/mockito/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Wie testet man die @Conditional in Spring Boot AutoConfiguration-Klassen?</title>
+      <link>https://ksewen.github.io/wie-testet-man-die-@conditional-in-spring-boot-autoconfiguration-klassen/</link>
+      <pubDate>Sun, 07 Jan 2024 16:27:33 +0300</pubDate>
+      <guid>https://ksewen.github.io/wie-testet-man-die-@conditional-in-spring-boot-autoconfiguration-klassen/</guid>
+      <description>Umgebung Java 21 Spring Boot 3.2.1 Junit 5.10.1 Mockito 5.7.0 AssertJ 3.24.0 Einführung „AutoConfiguration“ in Spring Boot ist ein Feature, das auf bedingter Konfiguration basiert, um verschiedene Komponenten und Funktionen einer Spring-Application automatisch zu konfigurieren. Dies wird durch die bedingte Annotation „@Conditional“ ermöglicht. Mithilfe diesen Bedingten können Konfigurationen auf bestimmten Bedingungen aktiviert oder deaktiviert werden. Eine Frage, wie stellt man sicher, dass die definierten Bedingungen korrekt sind, wenn man ein eigenen Spring-Boot-Starter erstellen möchte?</description>
+    </item>
+  </channel>
+</rss>
